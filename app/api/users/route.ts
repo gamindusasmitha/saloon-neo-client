@@ -1,5 +1,6 @@
 import userRegistrationRequestSchema from "@/dto/userRegistrationRequest";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req:NextRequest) {
@@ -37,13 +38,15 @@ export async function POST(req:NextRequest) {
             )
         }
 
+        const passwordHash = await bcrypt.hash( body.password , 12)
+
         await prisma.user.create(
             {
                 data : {
                     firstName : body.firstName,
                     lastName : body.lastName,
                     email : body.email,
-                    password : body.password
+                    password : passwordHash
                 }
             }
         )
@@ -54,7 +57,7 @@ export async function POST(req:NextRequest) {
             }
         )
     }catch(error){
-         NextResponse.json({
+         return NextResponse.json({
             messege : error 
          },
         {
